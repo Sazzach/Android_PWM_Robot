@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PWM_Robot</string>
+    <string name="Play_Button_Text">Play</string>
+</resources>
