@@ -22,9 +22,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            PWM.setPwmLeft(progress / 100.0);
-            PWM.setPwmRight(progress / 100.0);
-
             TextView value = (TextView) findViewById(R.id.textView);
             value.setText(Integer.toString(progress));
         }
@@ -37,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void play(View view) {
-        Log.d("Button", "Button Pressed");
         PWM.start();
     }
 
