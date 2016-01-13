@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             TextView value = (TextView) findViewById(R.id.textView);
             value.setText(Integer.toString(progress));
+
+            PWM.setFreq(480 + 48 * progress);
         }
 
         @Override

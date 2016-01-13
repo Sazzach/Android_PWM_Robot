@@ -34,8 +34,15 @@ public class PWM {
 
     private static boolean initialized = false;
 
-    private static int freq = 1000;
-    private static int periodLength = sampleRate / freq;
+    private static double freq = 1000;
+    private static double periodLength = sampleRate / freq;
+
+    public static void setFreq(double freq) {
+        Log.d("SampleRate", Integer.toString(sampleRate));
+
+        PWM.freq = freq;
+        periodLength = sampleRate / freq;
+    }
 
     public static void initSound() {
 
@@ -47,24 +54,37 @@ public class PWM {
     }
 
     public static void start() {
-        if(audioTrack.getPlayState() != audioTrack.PLAYSTATE_PLAYING) {
+        // TODO Find out what is causing sound artifacts at 71
+        
+        if(audioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING) {
+            String message;
 
-            if(audioTrack.getState() == audioTrack.STATE_NO_STATIC_DATA) {
+            if(audioTrack.getState() == AudioTrack.STATE_NO_STATIC_DATA) {
                 initSound();
 
                 audioTrack.write(audioBuffer, 0, bufferSize);
+
+                message = "Init";
             }
             else {
+                audioTrack.pause();
+
+                initSound();
+
+                audioTrack.write(audioBuffer, 0, bufferSize);
+
                 audioTrack.reloadStaticData();
+
+                message = "No Init";
             }
 
-            String message;
+            Log.d("init", message);
 
-            int result = audioTrack.setLoopPoints(0, periodLength * 100, -1);
-            if(result == audioTrack.SUCCESS) {
+            int result = audioTrack.setLoopPoints(0, (int) (periodLength * 100), -1);
+            if(result == AudioTrack.SUCCESS) {
                 message = "Success";
             }
-            else if(result == audioTrack.ERROR_BAD_VALUE) {
+            else if(result == AudioTrack.ERROR_BAD_VALUE) {
                 message = "Error bad value";
             }
             else {
