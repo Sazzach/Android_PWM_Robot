@@ -32,7 +32,9 @@ public class MainActivity extends AppCompatActivity {
         public void onStartTrackingTouch(SeekBar seekBar) {}
 
         @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {}
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            PWM.updateSound();
+        }
     }
 
     public void play(View view) {

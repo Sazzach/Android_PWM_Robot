@@ -53,6 +53,14 @@ public class PWM {
         initialized = true;
     }
 
+    public static void updateSound() {
+        initSound();
+        audioTrack.stop();
+        audioTrack.write(audioBuffer, 0, bufferSize);
+        audioTrack.setLoopPoints(0, (int) (periodLength * 100), -1);
+        audioTrack.play();
+    }
+
     public static void start() {
         // TODO Find out what is causing sound artifacts at 71
         
