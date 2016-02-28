@@ -14,101 +14,74 @@ import java.util.TimerTask;
 
 public class PWM {
 
-    // Sample rate of pwm signal.
-    // ~ 50kHz
-    private static final int sampleRate = AudioTrack.getNativeOutputSampleRate(
-            AudioManager.STREAM_MUSIC);
+    // Instance of pwm
+    private static PWM pwm;
 
-    // Size of internal buffer of audio stream
-    private static final int bufferSize = 50000;
-
-    private static final AudioTrack audioTrack = new AudioTrack(
-            AudioManager.STREAM_MUSIC,
-            sampleRate,
-            AudioFormat.CHANNEL_OUT_MONO,
-            AudioFormat.ENCODING_PCM_16BIT,
-            bufferSize,
-            AudioTrack.MODE_STATIC);
-
-    private static final short[] audioBuffer = new short[bufferSize];
-
-    private static boolean initialized = false;
-
-    private static double freq = 1000;
-    private static double periodLength = sampleRate / freq;
-
-    public static void setFreq(double freq) {
-        Log.d("SampleRate", Integer.toString(sampleRate));
-
-        PWM.freq = freq;
-        periodLength = sampleRate / freq;
-    }
-
-    public static void initSound() {
-
-        for(int i = 0; i < bufferSize; i++) {
-            audioBuffer[i] = (short) (Short.MAX_VALUE * Math.sin((Math.PI * 2 * freq * i) / sampleRate));
+    // Only one pwm controller is desired so use singleton.
+    public static PWM getPWM() {
+        if(pwm == null) {
+            pwm = new PWM();
         }
 
-        initialized = true;
+        return pwm;
     }
 
-    public static void updateSound() {
-        initSound();
-        audioTrack.stop();
-        audioTrack.write(audioBuffer, 0, bufferSize);
-        audioTrack.setLoopPoints(0, (int) (periodLength * 100), -1);
+
+
+    private final int sampleRate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
+
+    private AudioTrack audioTrack;
+
+    // In seconds.
+    private final double period = 0.02;
+    private double pulseWidth = 0.0015;
+
+    private short[] pwmBuffer;
+
+    private PWM() {
+        pwmBuffer = new short[(int) (sampleRate * period)];
+
+        audioTrack = new AudioTrack(
+                AudioManager.STREAM_MUSIC,
+                sampleRate,
+                AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                pwmBuffer.length * 2,
+                AudioTrack.MODE_STATIC);
+
+        updateBuffer();
+
+        audioTrack.setLoopPoints(0, pwmBuffer.length, -1);
+    }
+
+    public void start() {
         audioTrack.play();
     }
 
-    public static void start() {
-        // TODO Find out what is causing sound artifacts at 71
-        
-        if(audioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING) {
-            String message;
-
-            if(audioTrack.getState() == AudioTrack.STATE_NO_STATIC_DATA) {
-                initSound();
-
-                audioTrack.write(audioBuffer, 0, bufferSize);
-
-                message = "Init";
-            }
-            else {
-                audioTrack.pause();
-
-                initSound();
-
-                audioTrack.write(audioBuffer, 0, bufferSize);
-
-                audioTrack.reloadStaticData();
-
-                message = "No Init";
-            }
-
-            Log.d("init", message);
-
-            int result = audioTrack.setLoopPoints(0, (int) (periodLength * 100), -1);
-            if(result == AudioTrack.SUCCESS) {
-                message = "Success";
-            }
-            else if(result == AudioTrack.ERROR_BAD_VALUE) {
-                message = "Error bad value";
-            }
-            else {
-                message = "Error invalid operation";
-            }
-
-            Log.d("Loop", message);
-
-            audioTrack.play();
-        }
-        else {
-            Log.d("Invalid", "Invalid");
-        }
+    public void stop() {
+        audioTrack.pause();
     }
 
-    public static void stop() {
-        audioTrack.pause();
+    public void setPulseWidth(double pulseWidth) {
+        assert(pulseWidth <= sampleRate);
+
+        this.pulseWidth = pulseWidth;
+
+        updateBuffer();
+    }
+
+    private void updateBuffer() {
+        int onLength = (int) (sampleRate * pulseWidth);
+
+        for(int i = 0; i < pwmBuffer.length; i++) {
+            if(i <= onLength) {
+                pwmBuffer[i] = Short.MAX_VALUE;
+            }
+            else {
+                pwmBuffer[i] = Short.MIN_VALUE;
+            }
+        }
+
+        audioTrack.write(pwmBuffer, 0, pwmBuffer.length);
     }
 }

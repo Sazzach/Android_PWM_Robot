@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+    PWM pwm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -16,16 +18,19 @@ public class MainActivity extends AppCompatActivity {
 
         SeekBar pwmBar = (SeekBar) findViewById(R.id.seekBar);
         pwmBar.setOnSeekBarChangeListener(new PwmBarListener());
+
+        pwm = PWM.getPWM();
     }
 
     private class PwmBarListener implements SeekBar.OnSeekBarChangeListener {
+        int progress;
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             TextView value = (TextView) findViewById(R.id.textView);
             value.setText(Integer.toString(progress));
 
-            PWM.setFreq(480 + 48 * progress);
+            this.progress = progress;
         }
 
         @Override
@@ -33,15 +38,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            PWM.updateSound();
+            pwm.setPulseWidth(1.5e-3 + (progress - 50) / 100e3);
         }
     }
 
     public void play(View view) {
-        PWM.start();
+        pwm.start();
     }
 
     public void stop(View view) {
-        PWM.stop();
+        pwm.stop();
     }
 }
