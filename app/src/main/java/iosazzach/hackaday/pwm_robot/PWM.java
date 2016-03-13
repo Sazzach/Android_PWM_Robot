@@ -3,10 +3,6 @@ package iosazzach.hackaday.pwm_robot;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by samuel on 12/29/15.
@@ -34,27 +30,30 @@ public class PWM {
 
     // In seconds.
     private final double period = 0.02;
-    private double pulseWidth = 0.0015;
+    private double leftPulseWidth = 0.0015;
+    private double rightPulseWidth = 0.0015;
 
+    private int samples;
     private short[] pwmBuffer;
 
     private PWM() {
-        pwmBuffer = new short[(int) (sampleRate * period)];
+        samples = (int) (sampleRate * period);
+        pwmBuffer = new short[samples * 2];
 
         audioTrack = new AudioTrack(
                 AudioManager.STREAM_MUSIC,
                 sampleRate,
-                AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.CHANNEL_OUT_STEREO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 pwmBuffer.length * 2,
                 AudioTrack.MODE_STATIC);
 
         updateBuffer();
-
-        audioTrack.setLoopPoints(0, pwmBuffer.length, -1);
     }
 
     public void start() {
+        audioTrack.setLoopPoints(0, samples, -1);
+
         audioTrack.play();
     }
 
@@ -62,23 +61,45 @@ public class PWM {
         audioTrack.pause();
     }
 
-    public void setPulseWidth(double pulseWidth) {
-        assert(pulseWidth <= sampleRate);
+    public void setLeftPulseWidth(double leftPulseWidth) {
+        if(leftPulseWidth > period) {
+            this.leftPulseWidth = period;
+        }
+        else {
+            this.leftPulseWidth = leftPulseWidth;
+        }
 
-        this.pulseWidth = pulseWidth;
+        updateBuffer();
+    }
+
+    public void setRightPulseWidth(double rightPulseWidth) {
+        if(rightPulseWidth > period) {
+            this.rightPulseWidth = period;
+        }
+        else {
+            this.rightPulseWidth = rightPulseWidth;
+        }
 
         updateBuffer();
     }
 
     private void updateBuffer() {
-        int onLength = (int) (sampleRate * pulseWidth);
+        int leftOnSamples = (int) (sampleRate * leftPulseWidth);
+        int rightOnSamples = (int) (sampleRate * rightPulseWidth);
 
-        for(int i = 0; i < pwmBuffer.length; i++) {
-            if(i <= onLength) {
-                pwmBuffer[i] = Short.MAX_VALUE;
+        for(int i = 0; i < samples; i++) {
+            if(i <= leftOnSamples) {
+                pwmBuffer[i * 2] = Short.MAX_VALUE;
             }
             else {
-                pwmBuffer[i] = Short.MIN_VALUE;
+                pwmBuffer[i * 2] = Short.MIN_VALUE;
+            }
+
+            if(i <= rightOnSamples) {
+                pwmBuffer[i * 2 + 1] = Short.MAX_VALUE;
+            }
+            else {
+                pwmBuffer[i * 2 + 1] = Short.MIN_VALUE;
             }
         }
 
