@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    PWM pwm;
+    MotorController motorController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,18 +21,20 @@ public class MainActivity extends AppCompatActivity {
         SeekBar rightPwmBar = (SeekBar) findViewById(R.id.rightSeekBar);
         rightPwmBar.setOnSeekBarChangeListener(new RightPwmBarListener());
 
-        pwm = PWM.getPWM();
+        motorController = MotorController.getMotorController();
     }
 
     private class LeftPwmBarListener implements SeekBar.OnSeekBarChangeListener {
-        int progress;
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             TextView value = (TextView) findViewById(R.id.leftValueText);
-            value.setText(Integer.toString(progress));
 
-            this.progress = progress;
+            double velocity = (progress - 50) / 50.0;
+
+            value.setText(Double.toString(velocity));
+
+            motorController.setLeftVelocity(velocity);
         }
 
         @Override
@@ -41,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            pwm.setLeftPulseWidth(1.5e-3 + (progress - 50) / 100e3);
         }
     }
 
@@ -51,9 +52,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             TextView value = (TextView) findViewById(R.id.rightValueText);
-            value.setText(Integer.toString(progress));
 
-            this.progress = progress;
+            double velocity = (progress - 50) / 50.0;
+
+            value.setText(Double.toString(velocity));
+
+            motorController.setRightVelocity(velocity);
         }
 
         @Override
@@ -61,15 +65,14 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            pwm.setRightPulseWidth(1.5e-3 + (progress - 50) / 100e3);
         }
     }
 
     public void play(View view) {
-        pwm.start();
+        motorController.start();
     }
 
     public void stop(View view) {
-        pwm.stop();
+        motorController.stop();
     }
 }

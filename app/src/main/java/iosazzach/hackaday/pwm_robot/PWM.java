@@ -10,6 +10,12 @@ import android.media.AudioTrack;
 
 public class PWM {
 
+    public static final double CENTER_LEFT = 1.5e-3;
+    public static final double RANGE_LEFT = 0.5e-3;
+
+    public static final double CENTER_RIGHT = 1.5e-3;
+    public static final double RANGE_RIGHT = 0.5e-3;
+
     // Instance of pwm
     private static PWM pwm;
 
