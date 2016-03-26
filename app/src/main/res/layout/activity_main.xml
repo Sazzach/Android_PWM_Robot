@@ -9,62 +9,25 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="iosazzach.hackaday.pwm_robot.MainActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="50"
-            android:id="@+id/leftValueText" />
-
-        <SeekBar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/leftSeekBar"
-            android:max="100"
-            android:progress="50"
-            android:layout_marginTop="38dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="50"
-            android:id="@+id/rightValueText" />
-
-        <SeekBar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/rightSeekBar"
-            android:max="100"
-            android:progress="50"
-            android:layout_marginTop="38dp" />
-
-    </LinearLayout>
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/Play_Button_Text"
-        android:id="@+id/button"
-        android:onClick="play"
+        android:text="Start Manual Mode"
+        android:id="@+id/manuelButton"
         android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="68dp"
-        android:layout_marginStart="68dp"
-        android:layout_gravity="center_horizontal" />
+        android:layout_centerHorizontal="true"
+        android:onClick="launchManualMode"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Stop"
-        android:id="@+id/button2"
-        android:layout_alignTop="@+id/button"
-        android:layout_toRightOf="@+id/button"
-        android:layout_toEndOf="@+id/button"
-        android:onClick="stop"/>
+        android:text="Start Line Follow"
+        android:id="@+id/lineFollowButton"
+        android:onClick="launchLineFollow"
+        android:layout_below="@+id/manuelButton"
+        android:layout_alignRight="@+id/manuelButton"
+        android:layout_alignEnd="@+id/manuelButton"
+        android:layout_alignLeft="@+id/manuelButton"
+        android:layout_alignStart="@+id/manuelButton" />
 
 </RelativeLayout>
